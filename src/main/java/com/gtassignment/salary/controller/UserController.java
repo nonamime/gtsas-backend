@@ -17,13 +17,7 @@ public class UserController extends BaseController {
     @PostMapping(path = "/users/upload")
     public ResponseEntity<Object> usersUpload(@RequestParam(value = "file" ) MultipartFile multipartFile)
             throws Exception {
-
-        if (multipartFile.isEmpty()) throw new Exception("File Not Found");
-
-        if (!multipartFile.getContentType().equals("text/csv")) throw new Exception("File type is not csv");
-
         this.userService.parseCsv(multipartFile);
-
         return ResponseEntity.ok().build();
     }
 }

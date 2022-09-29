@@ -25,16 +25,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean parseCsv(MultipartFile multipartFile) throws Exception {
+        if (multipartFile.isEmpty()) throw new Exception("File Not Found");
+        if (!multipartFile.getContentType().equals("text/csv")) throw new Exception("File type is not csv");
+
         List<List<String>> records = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 multipartFile.getInputStream(), "UTF-8"))){
             String line;
             Boolean firstLineSkip = false;
+            var lineNumber = 0;
             while ((line = br.readLine()) != null) {
-                if (!firstLineSkip || (line != null && line.indexOf("#") != 0)) {
+                lineNumber++;
+                if (!firstLineSkip) {
                     firstLineSkip = false;
                     continue;
                 }
+                //skip comment line
+                if (line != null && line.indexOf("#") == 0) continue;
                 String[] values = line.split(",");
                 User user = userRepository.findById(commonUtils.convertStringToLong(values[0]))
                         .orElse(new User());
@@ -45,9 +52,9 @@ public class UserServiceImpl implements UserService {
                     userRepository.save(user);
                 } catch (DataIntegrityViolationException ex) {
                     //throw line detail along with exception when duplicate row appears
-                    throw new Exception("Duplicate Login on line :"+ line);
+                    throw new Exception("Duplicate Login on line :"+ lineNumber);
                 } catch (Exception ex) {
-                    throw new Exception(ex.getMessage() + " on line " + line);
+                    throw new Exception(ex.getMessage() + " on line " + lineNumber);
                 }
             }
 
