@@ -25,6 +25,8 @@ public class UserController extends BaseController {
     @PostMapping(path = "/upload")
     public ResponseEntity<Object> usersUpload(@RequestParam(value = "file" ) MultipartFile multipartFile)
             throws Exception {
+        //quick hack when no custom validation
+        if (multipartFile.getContentType().equals("text/csv")) throw new Exception("File type is not csv");
         //1. currently using ByteArrayResource to pass data around without saving it to temp folder and also
         //   to avoid file not found exception that happens with MultipartFile
         this.userService.enqueueCsvFile(new ByteArrayResource(multipartFile.getBytes()) {
