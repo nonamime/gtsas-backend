@@ -1,8 +1,10 @@
 package com.gtassignment.salary.service;
 
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.ByteArrayResource;
 
 public interface UserService {
 
-    Boolean parseCsv(MultipartFile multipartFile) throws Exception;
+    Boolean parseCsv(ByteArrayResource byteArrayResource) throws Exception;
+
+    void enqueueCsvFile(ByteArrayResource byteArrayResource) throws Exception;
 }

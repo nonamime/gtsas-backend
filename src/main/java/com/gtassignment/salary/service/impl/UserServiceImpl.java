@@ -3,15 +3,16 @@ package com.gtassignment.salary.service.impl;
 import com.gtassignment.salary.model.User;
 import com.gtassignment.salary.repository.UserRepository;
 import com.gtassignment.salary.service.UserService;
+import com.gtassignment.salary.task.QueueExecutor;
 import com.gtassignment.salary.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Callable;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -23,44 +24,60 @@ public class UserServiceImpl implements UserService {
     @Autowired
     CommonUtils commonUtils;
 
-    @Override
-    public Boolean parseCsv(MultipartFile multipartFile) throws Exception {
-        if (multipartFile.isEmpty()) throw new Exception("File Not Found");
-        if (!multipartFile.getContentType().equals("text/csv")) throw new Exception("File type is not csv");
+    @Autowired
+    QueueExecutor queueExecutor;
 
-        List<List<String>> records = new ArrayList<>();
+    @Override
+    public Boolean parseCsv(ByteArrayResource byteArrayResource) throws Exception {
+        if (byteArrayResource.getByteArray().length < 0) throw new Exception("Empty file uploaded");
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                multipartFile.getInputStream(), "UTF-8"))){
+                byteArrayResource.getInputStream(), StandardCharsets.UTF_8))){
             String line;
             Boolean firstLineSkip = false;
             var lineNumber = 0;
             while ((line = br.readLine()) != null) {
                 lineNumber++;
                 if (!firstLineSkip) {
-                    firstLineSkip = false;
+                    firstLineSkip = true;
                     continue;
                 }
                 //skip comment line
-                if (line != null && line.indexOf("#") == 0) continue;
+                if (line.indexOf("#") == 0) continue;
                 String[] values = line.split(",");
                 User user = userRepository.findById(commonUtils.convertStringToLong(values[0]))
                         .orElse(new User());
-                try{
+                try {
                     user.setLogin(commonUtils.convertStringToInteger(values[1]));
                     user.setName(values[2]);
                     user.setSalary(commonUtils.convertStringToDouble(values[3]));
                     userRepository.save(user);
                 } catch (DataIntegrityViolationException ex) {
-                    //throw line detail along with exception when duplicate row appears
-                    throw new Exception("Duplicate Login on line :"+ lineNumber);
+                    throw new Exception("Duplicate login on line :"+ lineNumber);
                 } catch (Exception ex) {
                     throw new Exception(ex.getMessage() + " on line " + lineNumber);
                 }
             }
-
         } catch (IOException ex) {
             throw new Exception("Read File Error");
         }
         return false;
+    }
+
+    @Override
+    public void enqueueCsvFile(ByteArrayResource byteArrayResource) throws Exception {
+        try {
+            queueExecutor.queueFile(new Callable<>() {
+                @Override
+                public Object call() throws Exception {
+                        System.out.println("processing file");
+                        return parseCsv(byteArrayResource);
+                }
+            }).get();
+        } catch (Exception e) {
+            var errorMessages = e.getMessage().split("(Exception:\s*)");
+            throw new Exception(errorMessages.length > 1
+                    ? errorMessages[1]
+                    : "Server error");
+        }
     }
 }
