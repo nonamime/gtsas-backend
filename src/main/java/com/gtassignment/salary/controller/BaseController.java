@@ -16,7 +16,7 @@ public class BaseController {
     public ResponseEntity<Object> handleException(Exception err) {
         System.out.println(err.getStackTrace().toString());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap("message1", err.getMessage()));
+                .body(Collections.singletonMap("message", err.getMessage()));
     }
 
     //Uniqueness violated

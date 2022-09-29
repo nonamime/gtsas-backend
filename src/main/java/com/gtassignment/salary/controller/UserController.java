@@ -1,19 +1,21 @@
 package com.gtassignment.salary.controller;
 
+import com.gtassignment.salary.model.User;
 import com.gtassignment.salary.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Min;
-import java.util.ArrayList;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 @Validated
 public class UserController extends BaseController {
 
@@ -34,12 +36,16 @@ public class UserController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(path = "/")
-    public ResponseEntity<List<Object>> getUsers(
-            @RequestParam(value = "minSalary") @Min(0) Double minSalary,
-            @RequestParam(value = "maxSalary") Double maxSalary,
-            @RequestParam(value = "offset") Integer offset,
-            @RequestParam(value = "order") String order) {
-        return ResponseEntity.ok(new ArrayList<>());
+    @GetMapping
+    public ResponseEntity<Page<List<User>>> getUsers(
+            @RequestParam(value = "minSalary") @Min(value = 0, message = "Value must be greater equals than 0")
+                Double minSalary,
+            @RequestParam(value = "maxSalary") @Min(value = 0, message = "Value must be greater equals than 0")
+                Double maxSalary,
+            @RequestParam(value = "offset") @Min(value = 0, message = "Value must be greater equals than 0")
+                Integer offset,
+            @RequestParam(value = "order") @Pattern(regexp = "^[-+][a-zA-Z]+$", message = "order format incorrect")
+                String order) throws Exception {
+        return ResponseEntity.ok(userService.getUsersByMinMaxWithOffsetAndOrder(minSalary, maxSalary, offset, order));
     }
 }
