@@ -28,4 +28,9 @@ public class CommonUtils {
             throw new Exception("Wrong Type on field " + input);
         }
     }
+
+    public String filterAlphaNumericString(String input) throws Exception {
+        if (!input.matches("[0-9a-zA-Z]+")) throw new Exception(input + " is not alphanumeric");
+        return input;
+    }
 }

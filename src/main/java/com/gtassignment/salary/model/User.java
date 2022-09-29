@@ -17,14 +17,14 @@ import java.util.List;
 public class User {
 
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id", length = 255)
+    private String id;
 
-    @Column(name = "login", unique = true)
-    private Integer login;
+    @Column(name = "login", length = 255, unique = true)
+    private String login;
 
-    @Column(name = "name")
+    @Lob
+    @Column(name = "name", length = 1024)
     private String name;
 
     @Column(name = "salary", precision = 10, scale = 2)

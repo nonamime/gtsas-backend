@@ -50,10 +50,10 @@ public class UserServiceImpl implements UserService {
                 //skip comment line
                 if (line.indexOf("#") == 0) continue;
                 String[] values = line.split(",");
-                User user = userRepository.findById(commonUtils.convertStringToLong(values[0]))
-                        .orElse(new User());
+                User user = userRepository.findById(commonUtils.filterAlphaNumericString(values[0]))
+                        .orElse(User.builder().id(commonUtils.filterAlphaNumericString(values[0])).build());
                 try {
-                    user.setLogin(commonUtils.convertStringToInteger(values[1]));
+                    user.setLogin(commonUtils.filterAlphaNumericString(values[1]));
                     user.setName(values[2]);
                     user.setSalary(commonUtils.convertStringToDouble(values[3]));
                     userRepository.save(user);

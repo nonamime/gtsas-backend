@@ -1,6 +1,7 @@
+DROP TABLE users;
 CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
-    login INT UNIQUE,
-    name VARCHAR(100),
+    id VARCHAR(255) PRIMARY KEY,
+    login VARCHAR(255) UNIQUE,
+    name VARCHAR(1024),
     salary NUMERIC(10,2) NOT NULL
 );
