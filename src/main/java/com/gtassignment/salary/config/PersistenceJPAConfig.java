@@ -18,7 +18,7 @@ public class PersistenceJPAConfig {
     EntityManagerFactory emf;
 
     @Autowired
-    private DataSource dataSource;
+    DataSource dataSource;
 
     @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager() {

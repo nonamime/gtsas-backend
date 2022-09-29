@@ -28,4 +28,9 @@ public class User {
 
     @Column(name = "salary", precision = 10, scale = 2)
     private Double salary;
+
+    public void setSalary(Double value) throws Exception {
+        if (value < 0) throw new Exception("Salary value must not less than 0");
+        this.salary = value;
+    }
 }
