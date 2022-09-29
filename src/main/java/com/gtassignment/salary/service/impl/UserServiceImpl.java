@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -66,19 +65,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Async
-    public Future<Boolean> enqueueCsvFile(ByteArrayResource byteArrayResource) throws Exception {
-        return queueExecutor.queueFile(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                try {
-                    System.out.println("processing file");
-                    return parseCsv(byteArrayResource);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
+    public void enqueueCsvFile(ByteArrayResource byteArrayResource) throws Exception {
+        try {
+            queueExecutor.queueFile(new Callable<>() {
+                @Override
+                public Object call() throws Exception {
+                        System.out.println("processing file");
+                        return parseCsv(byteArrayResource);
                 }
-                return false;
-            }
-        });
+            }).get();
+        } catch (Exception e) {
+            var errorMessages = e.getMessage().split("(Exception:\s*)");
+            throw new Exception(errorMessages.length > 1
+                    ? errorMessages[1]
+                    : "Server error");
+        }
     }
 }

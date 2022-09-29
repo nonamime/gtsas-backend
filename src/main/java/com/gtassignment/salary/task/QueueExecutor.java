@@ -6,12 +6,10 @@ import java.util.concurrent.*;
 @Component
 public class QueueExecutor {
 
-    private final ExecutorCompletionService completionService = new ExecutorCompletionService(
-            Executors.newSingleThreadExecutor(),
-            new LinkedBlockingQueue<>());
+    private ExecutorCompletionService completionService =
+            new ExecutorCompletionService(Executors.newSingleThreadExecutor());
 
-    public Future<Boolean> queueFile(Callable<Boolean> task) {
-        System.out.println("Queued file " + task);
+    public Future<Boolean> queueFile(Callable task) throws Exception {
         return completionService.submit(task);
     }
 }
