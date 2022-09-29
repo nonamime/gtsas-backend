@@ -29,7 +29,6 @@ public class UserServiceImpl implements UserService {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 multipartFile.getInputStream(), "UTF-8"))){
             String line;
-
             Boolean firstLineSkip = false;
             while ((line = br.readLine()) != null) {
                 if (!firstLineSkip || (line != null && line.indexOf("#") != 0)) {
@@ -37,18 +36,18 @@ public class UserServiceImpl implements UserService {
                     continue;
                 }
                 String[] values = line.split(",");
-
-                if (userRepository.findOne(new User(1,1,"1234",123.11))) throw new Exception("Duplicate id :" + values[2]);
+                User user = userRepository.findById(commonUtils.convertStringToLong(values[0]))
+                        .orElse(new User());
                 try{
-                    User user = User.builder()
-                            .id(commonUtils.convertStringToInteger(values[0]))
-                            .login(commonUtils.convertStringToInteger(values[1]))
-                            .name(values[2])
-                            .salary(commonUtils.convertStringToDouble(values[3])).build();
+                    user.setLogin(commonUtils.convertStringToInteger(values[1]));
+                    user.setName(values[2]);
+                    user.setSalary(commonUtils.convertStringToDouble(values[3]));
                     userRepository.save(user);
                 } catch (DataIntegrityViolationException ex) {
                     //throw line detail along with exception when duplicate row appears
-                    throw new Exception("Unique constraint on line :"+ line);
+                    throw new Exception("Duplicate Login on line :"+ line);
+                } catch (Exception ex) {
+                    throw new Exception(ex.getMessage() + " on line " + line);
                 }
             }
 

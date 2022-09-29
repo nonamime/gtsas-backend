@@ -24,6 +24,6 @@ public class UserController extends BaseController {
 
         this.userService.parseCsv(multipartFile);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
