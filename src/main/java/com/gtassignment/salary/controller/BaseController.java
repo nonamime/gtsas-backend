@@ -1,16 +1,36 @@
 package com.gtassignment.salary.controller;
 
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class BaseController {
 
     @ExceptionHandler({ Exception.class })
     public ResponseEntity<Object> handleException(Exception err) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap("message", err.getMessage()));
+                .body(Collections.singletonMap("message2", err.getMessage()));
+    }
+
+    //Uniqueness violated
+    @ExceptionHandler({ DataIntegrityViolationException.class })
+    public ResponseEntity<Object> handleInvalidParamException(Exception err) {
+
+        List<String> errorMessage = new ArrayList<>();
+        if (err.getClass().equals(DataIntegrityViolationException.class)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections
+                            .singletonMap("mesaage3", "Duplicated data, %s".format(((DataIntegrityViolationException) err).getMessage())));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections
+                        .singletonMap("mesaage1", "Duplicated data, %s".format(err.getMessage())));
     }
 }
