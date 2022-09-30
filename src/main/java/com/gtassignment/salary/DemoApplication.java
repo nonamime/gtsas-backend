@@ -11,11 +11,4 @@ public class DemoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
-//
-//	@Bean
-//	public MethodValidationPostProcessor methodValidationPostProcessor() {
-//		MethodValidationPostProcessor mvpp = new MethodValidationPostProcessor();
-//		mvpp.setProxyTargetClass(true);
-//		return mvpp;
-//	}
 }
