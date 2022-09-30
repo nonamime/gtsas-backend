@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, String> {
 
+    @Override
     Optional<User> findById(String id);
 
 //    @Query(value = "SELECT u FROM Users u where u.salary >= :minSalary AND u.salary <= :maxSalary", nativeQuery = true)

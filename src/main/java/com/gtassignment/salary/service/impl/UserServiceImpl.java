@@ -1,10 +1,12 @@
 package com.gtassignment.salary.service.impl;
 
+import com.gtassignment.salary.dto.UserRequestParamDto;
 import com.gtassignment.salary.model.User;
 import com.gtassignment.salary.repository.UserRepository;
 import com.gtassignment.salary.service.UserService;
 import com.gtassignment.salary.task.QueueExecutor;
 import com.gtassignment.salary.utils.CommonUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,10 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -99,5 +99,47 @@ public class UserServiceImpl implements UserService {
                 PageRequest.of(offset, 30, sortBySetting));
         System.out.println(result);
         return result;
+    }
+
+    @Override
+    public User getUser(String id) throws Exception {
+        return userRepository.findById(id).orElseThrow(() -> new Exception("No specific user found"));
+    }
+
+    @Override
+    public void deleteUser(String id) throws Exception {
+        try {
+            userRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new Exception("Fail to delete user with "+ id);
+        }
+    }
+
+    @Override
+    public void editUser(UserRequestParamDto userDto) throws Exception {
+        try {
+            var user = userRepository.findById(userDto.getId())
+                    .orElseThrow(() -> new Exception("No specific user found"));
+            user.setSalary(userDto.getSalary());
+            user.setLogin(userDto.getLogin());
+            user.setName(userDto.getName());
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new Exception("Fail to update user with " + userDto.getId());
+        }
+    }
+
+    @Override
+    public User addUser(UserRequestParamDto userDto) throws Exception {
+        if (userRepository.findById(userDto.getId()).isPresent()) {
+            throw new Exception("User existed");
+        }
+        var user = User.builder()
+                .id(userDto.getId())
+                .login(userDto.getLogin())
+                .name(userDto.getName())
+                .salary(userDto.getSalary())
+                .build();
+        return userRepository.save(user);
     }
 }

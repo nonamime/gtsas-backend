@@ -1,5 +1,6 @@
 package com.gtassignment.salary.controller;
 
+import com.gtassignment.salary.dto.UserRequestParamDto;
 import com.gtassignment.salary.model.User;
 import com.gtassignment.salary.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -25,7 +26,6 @@ public class UserController extends BaseController {
     @PostMapping(path = "/upload")
     public ResponseEntity<Object> usersUpload(@RequestParam(value = "file" ) MultipartFile multipartFile)
             throws Exception {
-        System.out.println(multipartFile.getContentType());
         //quick hack when no custom validation
         if (!multipartFile.getContentType().equals("text/csv")) throw new Exception("File type is not csv");
         //1. currently using ByteArrayResource to pass data around without saving it to temp folder and also
@@ -50,5 +50,31 @@ public class UserController extends BaseController {
             @RequestParam(value = "order") @Pattern(regexp = "^[-+][a-zA-Z]+$", message = "order format incorrect")
                 String order) throws Exception {
         return ResponseEntity.ok(userService.getUsersByMinMaxWithOffsetAndOrder(minSalary, maxSalary, offset, order));
+    }
+
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<User> getUser(
+            @PathVariable("id") @Pattern(regexp = "^[0-9a-zA-Z]+$", message = "Id is not alphanumeric") String id)
+            throws Exception {
+        return ResponseEntity.ok(userService.getUser(id));
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable("id") @Pattern(regexp = "^[0-9a-zA-Z]+$", message = "Id is not alphanumeric") String id)
+            throws Exception {
+        userService.deleteUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<Void> editUser(@Valid @RequestBody UserRequestParamDto userDto) throws Exception {
+        userService.editUser(userDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<User> addUser(@Valid @RequestBody UserRequestParamDto userDto) throws Exception {
+        return ResponseEntity.ok( userService.addUser(userDto));
     }
 }
