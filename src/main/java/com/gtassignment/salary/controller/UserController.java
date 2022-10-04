@@ -67,7 +67,7 @@ public class UserController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping
+    @PatchMapping(value = "/{id}")
     public ResponseEntity<Void> editUser(@Valid @RequestBody UserRequestParamDto userDto) throws Exception {
         userService.editUser(userDto);
         return ResponseEntity.ok().build();
