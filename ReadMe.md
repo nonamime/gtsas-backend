@@ -1,7 +1,3 @@
-# gtsas
-Gt Student Administrative Systems
-A system for admin to manage teacher and student.
-
 ## Maven
 
 ### Testing
